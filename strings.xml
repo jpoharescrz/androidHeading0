@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Heading0</string>
+    <string name="action_settings">Settings</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="_0">0</string>
+    <string name="_000">000</string>
+    <string name="heading">Heading:</string>
+    <string name="seconds">Seconds:</string>
+    <string name="compass_heading">Compass Heading</string>
+</resources>
