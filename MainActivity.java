@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -15,6 +16,7 @@ import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Button;
 import android.util.Log;
+import java.util.List;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Button btnStartStop;
     Integer count;
     //float heading;
-    TextView tvHeading;
+    TextView tvHeading, tvDeviceList;
     //boolean hdgUpdated = false;
     long time;
 
@@ -42,6 +44,59 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float[] mR = new float[9];
     private float[] mOrientation = new float[3];
     private float mCurrentDegree = 0f;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        counter = findViewById(R.id.tviewCounter) ;
+        tvHeading = findViewById(R.id.tviewHeading) ;
+        btnStartStop = findViewById(R.id.btnStartStop);
+        tvDeviceList = findViewById(R.id.tvDevices);
+        count = 0;
+
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        //@Nullable
+        List<Sensor> mList= mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        for (int i = 1; i < mList.size(); i++) {
+            tvDeviceList.setVisibility(View.VISIBLE);
+            //tvDeviceList.append("\n" + mList.get(i).getName() + "\n" + mList.get(i).getVendor() + "\n" + mList.get(i).getVersion());
+            tvDeviceList.append("\n" + mList.get(i).getName());
+        }
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // for the system's orientation sensor registered listeners
+        mSensorManager.registerListener(this, mAccelerometer, 200000, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, mMagnetometer, 200000,
+                SensorManager.SENSOR_DELAY_GAME);
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // to stop the listener and save battery
+        mSensorManager.unregisterListener(this, mMagnetometer);
+        mSensorManager.unregisterListener(this, mAccelerometer);
+    }
 
     // Create the Handler object (on the main thread by default)
     Handler handler = new Handler();
@@ -72,11 +127,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     };
 
+    // SensorEventListener override
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // not in use
     }
 
+    // SensorEventListener override
     public void onSensorChanged(SensorEvent event) {
          if (event.sensor == mMagnetometer) {
 
@@ -131,49 +188,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        counter = findViewById(R.id.tviewCounter) ;
-        tvHeading = findViewById(R.id.tviewHeading) ;
-        btnStartStop = findViewById(R.id.btnStartStop);
-        count = 0;
-
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // for the system's orientation sensor registered listeners
-        mSensorManager.registerListener(this, mAccelerometer, 200000, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, mMagnetometer, 200000,
-                SensorManager.SENSOR_DELAY_GAME);
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // to stop the listener and save battery
-        mSensorManager.unregisterListener(this, mMagnetometer);
-        mSensorManager.unregisterListener(this, mAccelerometer);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
